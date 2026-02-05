@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Map Design</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.css" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+
+        #menu {
+            background: #fff;
+            position: absolute;
+            z-index: 1;
+            top: 10px;
+            right: 10px;
+            border-radius: 3px;
+            width: 140px;
+            border: 1px solid rgba(0, 0, 0, 0.4);
+            font-family: 'Open Sans', sans-serif;
+        }
+
+        #menu a {
+            font-size: 13px;
+            color: #404040;
+            display: block;
+            margin: 0;
+            padding: 10px;
+            text-decoration: none;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.25);
+            text-align: center;
+        }
+
+        #menu a:last-child {
+            border: none;
+        }
+
+        #menu a:hover {
+            background-color: #f8f8f8;
+            color: #404040;
+        }
+
+        #menu a.active {
+            background-color: #3887be;
+            color: #ffffff;
+        }
+
+        #menu a.active:hover {
+            background: #3074a4;
+        }
+
+        #info-box {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 15px;
+            border-radius: 5px;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+            font-family: 'Open Sans', sans-serif;
+            max-width: 250px;
+        }
+        
+        #info-box h3 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+        }
+
+        #info-box p {
+            margin: 3px 0;
+            font-size: 13px;
+        }
+        </style>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.8.1/mapbox-gl.js"></script>
+</head>
+
+<body>
+    <nav id="menu"></nav>
+    <div id='map'></div>
+
+    <div id="info-box">
+        <h3>Seattle Map Design</h3>
+        <p>This map shows a thematic point map of Seattle's historic landmarks and a themed drainage map (basins).</p>
+        <p>Data credits: Drainage & landmark data: Seattle GeoData</p>
+    </div>
+
+    <script type="text/javascript">
+        mapboxgl.accessToken =
+            'pk.eyJ1IjoiaG9sbHlzdGV3IiwiYSI6ImNta3k3cTJqcDA0YnEzY3E3eGZyOTFmazIifQ.FTqjbVJmwX5n0w6SnEKo9A';
+
+        let map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/dark-v10',
+            zoom: 11,
+            center: [-122.2559435, 47.6002614]
+        });
+
+        map.on('load', () => {
+            const sources = {
+                'basemap-tiles': 'assets/basemap/{z}/{x}/{y}.png',
+                'drainage-tiles': 'assets/drainage/{z}/{x}/{y}.png',
+                'thematicbase-tiles': 'assets/thematicbase/{z}/{x}/{y}.png'
+            };
+
+            for (const [id, path] of Object.entries(sources)) {
+                map.addSource(id, {
+                    'type': 'raster',
+                    'tiles': [path],
+                    'tileSize': 256,
+                    'attribution': 'Map tiles designed by Holly Stewart'
+                });
+
+                map.addLayer({
+                    'id': id,
+                    'type': 'raster',
+                    'layout': { 'visibility': 'none' },
+                    'source': id
+                });
+            }
+        });
+
+        map.on('idle', () => {
+            const layerIds = ['basemap-tiles', 'drainage-tiles', 'thematicbase-tiles'];
+
+            for (const id of layerIds) {
+                if (document.getElementById(id)) continue;
+
+                const link = document.createElement('a');
+                link.id = id;
+                link.href = '#';
+                link.textContent = id.replace('-tiles', '');
+                link.className = 'inactive';
+
+                link.onclick = function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const visibility = map.getLayoutProperty(id, 'visibility');
+
+                    if (visibility === 'visible') {
+                        map.setLayoutProperty(id, 'visibility', 'none');
+                        this.className = '';
+                    } else {
+                        map.setLayoutProperty(id, 'visibility', 'visible');
+                        this.className = 'active';
+                    }
+                };
+
+                document.getElementById('menu').appendChild(link);
+            }
+        });
+    </script>
+</body>
+</html>
