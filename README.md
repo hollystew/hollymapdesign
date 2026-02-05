@@ -2,7 +2,7 @@
 [Access to Web map](http://127.0.0.1:5500/index.html)  
 
 ### Modified Basemap Layer  
-![Screenshot](assets/basemapscreenshot)  
+![Project Screenshot](assets/basemapscreenshot)  
 
 ### Thematic Historic Landmarks Map (with Basemap)  
 ![Screenshot](assets/thematicscreenshot)  
